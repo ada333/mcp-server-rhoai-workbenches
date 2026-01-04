@@ -1,9 +1,10 @@
-package main
+package tools
 
 import (
 	"context"
 	"fmt"
 
+	core "github.com/ada333/MCP-test/main_logic"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -11,20 +12,20 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input CreateWorkbenchInput) (*mcp.CallToolResult, WorkbenchOutput, error) {
-	dyn, err := getDynamicClient()
+func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.CreateWorkbenchInput) (*mcp.CallToolResult, core.WorkbenchOutput, error) {
+	dyn, err := GetDynamicClient()
 	if err != nil {
-		return nil, WorkbenchOutput{}, err
+		return nil, core.WorkbenchOutput{}, err
 	}
 
 	repoURL, gitCommit, imageName, err := GetImageInfo(ctx, input.ImageDisplayName, input.ImageTag)
 	if err != nil {
-		return nil, WorkbenchOutput{}, fmt.Errorf("failed to lookup image info: %v", err)
+		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to lookup image info: %v", err)
 	}
 
 	err = createPersistentVolumeClaim(ctx, dyn, input.Namespace, input.WorkbenchName, "10Gi")
 	if err != nil {
-		return nil, WorkbenchOutput{}, fmt.Errorf("failed to create PVC: %v", err)
+		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create PVC: %v", err)
 	}
 
 	notebookArgs := fmt.Sprintf(`--ServerApp.port=8888
@@ -121,7 +122,8 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input Create
 							map[string]interface{}{
 								"name": "shm",
 								"emptyDir": map[string]interface{}{
-									"medium": "Memory",
+									"medium":    "Memory",
+									"sizeLimit": "1Gi",
 								},
 							},
 						},
@@ -131,12 +133,12 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input Create
 		},
 	}
 
-	_, err = dyn.Resource(workbenchesGVR).Namespace(input.Namespace).Create(ctx, notebook, metav1.CreateOptions{})
+	_, err = dyn.Resource(core.WorkbenchesGVR).Namespace(input.Namespace).Create(ctx, notebook, metav1.CreateOptions{})
 	if err != nil {
-		return nil, WorkbenchOutput{}, fmt.Errorf("failed to create notebook: %v", err)
+		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create notebook: %v", err)
 	}
 
-	return nil, WorkbenchOutput{Message: "Workbench was succesfully created!"}, nil
+	return nil, core.WorkbenchOutput{Message: "Workbench was succesfully created!"}, nil
 }
 
 func createPersistentVolumeClaim(ctx context.Context, dyn dynamic.Interface, namespace, name, size string) error {
@@ -162,9 +164,49 @@ func createPersistentVolumeClaim(ctx context.Context, dyn dynamic.Interface, nam
 		},
 	}
 
-	_, err := dyn.Resource(pvcGVR).Namespace(namespace).Create(ctx, pvc, metav1.CreateOptions{})
+	_, err := dyn.Resource(core.PvcGVR).Namespace(namespace).Create(ctx, pvc, metav1.CreateOptions{})
 	if err != nil && !errors.IsAlreadyExists(err) {
 		return err
 	}
 	return nil
+}
+
+// from display name and version, gets url, git commit and image name
+func GetImageInfo(ctx context.Context, displayName, version string) (string, string, string, error) {
+	dyn, err := GetDynamicClient()
+	if err != nil {
+		return "", "", "", err
+	}
+
+	images, err := dyn.Resource(core.ImagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
+		LabelSelector: "opendatahub.io/notebook-image=true",
+	})
+	if err != nil {
+		return "", "", "", fmt.Errorf("failed to list images: %v", err)
+	}
+
+	for _, image := range images.Items {
+		annotations := image.GetAnnotations()
+		if annotations["opendatahub.io/notebook-image-name"] == displayName {
+			repoURL, found, err := unstructured.NestedString(image.Object, "status", "dockerImageRepository")
+			if !found || err != nil {
+				repoURL = "URL not available"
+			}
+			imageName := image.GetName()
+
+			tagsRaw, _, _ := unstructured.NestedSlice(image.Object, "spec", "tags")
+			for _, t := range tagsRaw {
+				tagMap, ok := t.(map[string]interface{})
+				if !ok {
+					continue
+				}
+				tagName, _ := tagMap["name"].(string)
+				if tagName == version {
+					tagAnnotations, _, _ := unstructured.NestedStringMap(tagMap, "annotations")
+					return repoURL, tagAnnotations["opendatahub.io/notebook-build-commit"], imageName, nil
+				}
+			}
+		}
+	}
+	return "", "", "", fmt.Errorf("image not found: %s:%s", displayName, version)
 }

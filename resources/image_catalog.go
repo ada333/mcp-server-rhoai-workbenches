@@ -1,14 +1,14 @@
-package main
+package resources
 
 import (
 	"context"
 	"encoding/json"
 	"fmt"
 
+	core "github.com/ada333/MCP-test/main_logic"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 )
 
 type ImageDef struct {
@@ -18,13 +18,12 @@ type ImageDef struct {
 }
 
 func GetImages(ctx context.Context) ([]ImageDef, error) {
-	dyn, err := getDynamicClient()
+	dyn, err := core.LogIntoClusterDynamic()
 	if err != nil {
 		return nil, err
 	}
 
-	imagesGVR := schema.GroupVersionResource{Group: "image.openshift.io", Version: "v1", Resource: "imagestreams"}
-	images, err := dyn.Resource(imagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
+	images, err := dyn.Resource(core.ImagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
 		LabelSelector: "opendatahub.io/notebook-image=true",
 	})
 	if err != nil {
@@ -58,46 +57,6 @@ func GetImages(ctx context.Context) ([]ImageDef, error) {
 		})
 	}
 	return result, nil
-}
-
-// from display name and version, gets url, git commit and image name
-func GetImageInfo(ctx context.Context, displayName, version string) (string, string, string, error) {
-	dyn, err := getDynamicClient()
-	if err != nil {
-		return "", "", "", err
-	}
-
-	images, err := dyn.Resource(imagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
-		LabelSelector: "opendatahub.io/notebook-image=true",
-	})
-	if err != nil {
-		return "", "", "", fmt.Errorf("failed to list images: %v", err)
-	}
-
-	for _, image := range images.Items {
-		annotations := image.GetAnnotations()
-		if annotations["opendatahub.io/notebook-image-name"] == displayName {
-			repoURL, found, err := unstructured.NestedString(image.Object, "status", "dockerImageRepository")
-			if !found || err != nil {
-				repoURL = "URL not available"
-			}
-			imageName := image.GetName()
-
-			tagsRaw, _, _ := unstructured.NestedSlice(image.Object, "spec", "tags")
-			for _, t := range tagsRaw {
-				tagMap, ok := t.(map[string]interface{})
-				if !ok {
-					continue
-				}
-				tagName, _ := tagMap["name"].(string)
-				if tagName == version {
-					tagAnnotations, _, _ := unstructured.NestedStringMap(tagMap, "annotations")
-					return repoURL, tagAnnotations["opendatahub.io/notebook-build-commit"], imageName, nil
-				}
-			}
-		}
-	}
-	return "", "", "", fmt.Errorf("image not found: %s:%s", displayName, version)
 }
 
 func ImagesResourceHandler(ctx context.Context, req *mcp.ReadResourceRequest) (*mcp.ReadResourceResult, error) {
