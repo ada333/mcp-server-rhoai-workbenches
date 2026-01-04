@@ -39,6 +39,11 @@ func main() {
 	}, ListImages)
 
 	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Create Custom Image",
+		Description: "create a new custom notebook image",
+	}, CreateCustomImage)
+
+	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create Workbench",
 		Description: "create a new workbench with given name, image and image URL in a given project namespace",
 	}, CreateWorkbench)

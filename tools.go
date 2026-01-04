@@ -9,6 +9,7 @@ import (
 
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	k8stypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
@@ -137,4 +138,68 @@ func ListImages(ctx context.Context, req *mcp.CallToolRequest, input ListWorkben
 		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Annotations["opendatahub.io/notebook-image-name"], image.URL, strings.Join(image.Versions, "\n"))
 	}
 	return nil, ListImagesOutput{Images: msg}, nil
+}
+
+func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input CreateCustomImageInput) (*mcp.CallToolResult, WorkbenchOutput, error) {
+	dyn, err := getDynamicClient()
+	if err != nil {
+		return nil, WorkbenchOutput{}, err
+	}
+
+	namespace := "redhat-ods-applications"
+
+	imageStream := &unstructured.Unstructured{
+		Object: map[string]interface{}{
+			"kind":       "ImageStream",
+			"apiVersion": "image.openshift.io/v1",
+			"metadata": map[string]interface{}{
+				"name":      input.ImageName,
+				"namespace": namespace,
+				"annotations": map[string]interface{}{
+					"opendatahub.io/notebook-image-creator":   "htpasswd-cluster-admin-user", // who should it be?
+					"opendatahub.io/notebook-image-desc":      input.ImageDescription,
+					"opendatahub.io/notebook-image-name":      input.ImageName,
+					"opendatahub.io/notebook-image-url":       input.ImageLocation,
+					"opendatahub.io/recommended-accelerators": "[]",
+				},
+				"labels": map[string]interface{}{
+					"app.kubernetes.io/created-by":  "byon",
+					"opendatahub.io/dashboard":      "true",
+					"opendatahub.io/notebook-image": "true",
+				},
+			},
+			"spec": map[string]interface{}{
+				"lookupPolicy": map[string]interface{}{
+					"local": true,
+				},
+				"tags": []interface{}{
+					map[string]interface{}{
+						"name": "latest",
+						"annotations": map[string]interface{}{
+							"opendatahub.io/notebook-python-dependencies": "[]",
+							"opendatahub.io/notebook-software":            "[]",
+							"openshift.io/imported-from":                  input.ImageLocation,
+						},
+						"from": map[string]interface{}{
+							"kind": "DockerImage",
+							"name": input.ImageLocation,
+						},
+						"importPolicy": map[string]interface{}{
+							"importMode": "Legacy",
+						},
+						"referencePolicy": map[string]interface{}{
+							"type": "Source",
+						},
+					},
+				},
+			},
+		},
+	}
+
+	_, err = dyn.Resource(imagesGVR).Namespace(namespace).Create(ctx, imageStream, metav1.CreateOptions{})
+	if err != nil {
+		return nil, WorkbenchOutput{}, fmt.Errorf("failed to create notebook: %v", err)
+	}
+
+	return nil, WorkbenchOutput{Message: "Workbench was succesfully created!"}, nil
 }

@@ -67,7 +67,6 @@ func GetImageInfo(ctx context.Context, displayName, version string) (string, str
 		return "", "", "", err
 	}
 
-	imagesGVR := schema.GroupVersionResource{Group: "image.openshift.io", Version: "v1", Resource: "imagestreams"}
 	images, err := dyn.Resource(imagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
 		LabelSelector: "opendatahub.io/notebook-image=true",
 	})

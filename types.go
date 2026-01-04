@@ -6,6 +6,8 @@ var workbenchesGVR = schema.GroupVersionResource{Group: "kubeflow.org", Version:
 
 var pvcGVR = schema.GroupVersionResource{Group: "", Version: "v1", Resource: "persistentvolumeclaims"}
 
+var imagesGVR = schema.GroupVersionResource{Group: "image.openshift.io", Version: "v1", Resource: "imagestreams"}
+
 type PodsOutput struct {
 	Pods string `json:"pods" jsonschema_description:"the list of pods"`
 }
@@ -56,4 +58,10 @@ type CreateWorkbenchInput struct {
 
 type ListImagesOutput struct {
 	Images string `json:"images" jsonschema_description:"the list of images"`
+}
+
+type CreateCustomImageInput struct {
+	ImageLocation    string `json:"imageLocation" jsonschema_description:"the location of the image"`
+	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`
+	ImageDescription string `json:"imageDescription" jsonschema_description:"the description of the image"`
 }
