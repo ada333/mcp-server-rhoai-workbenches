@@ -12,9 +12,9 @@ import (
 )
 
 type ImageDef struct {
-	Name     string   `json:"name"`
-	URL      string   `json:"url"`
-	Versions []string `json:"versions"`
+	Annotations map[string]string `json:"annotations"`
+	URL         string            `json:"url"`
+	Versions    []string          `json:"versions"`
 }
 
 func GetImages(ctx context.Context) ([]ImageDef, error) {
@@ -34,7 +34,6 @@ func GetImages(ctx context.Context) ([]ImageDef, error) {
 	var result []ImageDef
 	for _, image := range images.Items {
 		annotations := image.GetAnnotations()
-		displayName := annotations["opendatahub.io/notebook-image-name"]
 
 		repoURL, found, err := unstructured.NestedString(image.Object, "status", "dockerImageRepository")
 		if !found || err != nil {
@@ -53,14 +52,15 @@ func GetImages(ctx context.Context) ([]ImageDef, error) {
 		}
 
 		result = append(result, ImageDef{
-			Name:     displayName,
-			URL:      repoURL,
-			Versions: versions,
+			Annotations: annotations,
+			URL:         repoURL,
+			Versions:    versions,
 		})
 	}
 	return result, nil
 }
 
+// from display name and version, gets url, git commit and image name
 func GetImageInfo(ctx context.Context, displayName, version string) (string, string, string, error) {
 	dyn, err := getDynamicClient()
 	if err != nil {

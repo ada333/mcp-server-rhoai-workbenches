@@ -134,7 +134,7 @@ func ListImages(ctx context.Context, req *mcp.CallToolRequest, input ListWorkben
 
 	msg := ""
 	for _, image := range images {
-		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Name, image.URL, strings.Join(image.Versions, "\n"))
+		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Annotations["opendatahub.io/notebook-image-name"], image.URL, strings.Join(image.Versions, "\n"))
 	}
 	return nil, ListImagesOutput{Images: msg}, nil
 }
