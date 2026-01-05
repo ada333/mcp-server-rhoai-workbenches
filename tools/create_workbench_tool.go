@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	core "github.com/ada333/MCP-test/main_logic"
+	core "github.com/ada333/MCP-test/core"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"

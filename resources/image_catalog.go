@@ -5,11 +5,16 @@ import (
 	"encoding/json"
 	"fmt"
 
-	core "github.com/ada333/MCP-test/main_logic"
+	core "github.com/ada333/MCP-test/core"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
+	"k8s.io/client-go/dynamic"
 )
+
+var GetDynamicClient = func() (dynamic.Interface, error) {
+	return core.LogIntoClusterDynamic()
+}
 
 type ImageDef struct {
 	Annotations map[string]string `json:"annotations"`
@@ -18,7 +23,7 @@ type ImageDef struct {
 }
 
 func GetImages(ctx context.Context) ([]ImageDef, error) {
-	dyn, err := core.LogIntoClusterDynamic()
+	dyn, err := GetDynamicClient()
 	if err != nil {
 		return nil, err
 	}
