@@ -2,7 +2,7 @@ lint:
 	golangci-lint run
 
 test:
-	go test -v ./tests
+	go test -v ./tools/... ./resources/... ./prompts/...
 	
 
 
