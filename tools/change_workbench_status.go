@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"time"
 
-	core "github.com/ada333/MCP-test/core"
+	core "github.com/amaly/mcp-server-rhoai/core"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8stypes "k8s.io/apimachinery/pkg/types"

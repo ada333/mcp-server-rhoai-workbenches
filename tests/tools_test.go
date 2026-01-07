@@ -9,9 +9,9 @@ import (
 	"testing"
 	"time"
 
-	core "github.com/ada333/MCP-test/core"
-	"github.com/ada333/MCP-test/resources"
-	"github.com/ada333/MCP-test/tools"
+	core "github.com/amaly/mcp-server-rhoai/core"
+	"github.com/amaly/mcp-server-rhoai/resources"
+	"github.com/amaly/mcp-server-rhoai/tools"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"

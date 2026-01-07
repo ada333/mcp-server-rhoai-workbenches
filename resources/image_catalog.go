@@ -5,16 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
-	core "github.com/ada333/MCP-test/core"
+	core "github.com/amaly/mcp-server-rhoai/core"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 )
 
-var GetDynamicClient = func() (dynamic.Interface, error) {
-	return core.LogIntoClusterDynamic()
-}
+var GetDynamicClient = func() (dynamic.Interface, error) { return core.LogIntoClusterDynamic() }
 
 type ImageDef struct {
 	Annotations map[string]string `json:"annotations"`

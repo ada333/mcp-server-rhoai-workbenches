@@ -4,9 +4,9 @@ import (
 	"context"
 	"log"
 
-	"github.com/ada333/MCP-test/prompts"
-	"github.com/ada333/MCP-test/resources"
-	"github.com/ada333/MCP-test/tools"
+	"github.com/amaly/mcp-server-rhoai/prompts"
+	"github.com/amaly/mcp-server-rhoai/resources"
+	"github.com/amaly/mcp-server-rhoai/tools"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
@@ -52,7 +52,7 @@ func main() {
 	}, tools.CreateWorkbench)
 
 	server.AddResource(&mcp.Resource{
-		URI:         "resource://mcp-test/images",
+		URI:         "resource://mcp-server-rhoai/images",
 		Name:        "Image Catalog",
 		Description: "List of available notebook images their URLs and tags",
 		MIMEType:    "application/json",

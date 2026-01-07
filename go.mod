@@ -1,4 +1,4 @@
-module github.com/ada333/MCP-test
+module github.com/amaly/mcp-server-rhoai
 
 go 1.24.0
 

@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"strings"
 
-	core "github.com/ada333/MCP-test/core"
-	"github.com/ada333/MCP-test/resources"
+	core "github.com/amaly/mcp-server-rhoai/core"
+	"github.com/amaly/mcp-server-rhoai/resources"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/dynamic"

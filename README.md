@@ -10,14 +10,8 @@ Example code you can add to make new MCP server (the command is path to the bina
 ```
 {
   "mcpServers": {
-    "greeter": {
-      "command": "/home/amaly/MCP-test/greeter"
-    },
-    "podslist": {
-      "command": "/home/amaly/MCP-test/podslist"
-    },
-    "workbenchlist": {
-      "command": "/home/amaly/MCP-test/WorkbenchList"
+    "mcp-server-rhoai": {
+      "command": "/home/amaly/mcp-server-rhoai/mcp-server-rhoai"
     }
   }
 }
