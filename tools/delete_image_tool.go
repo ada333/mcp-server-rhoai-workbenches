@@ -15,7 +15,7 @@ func DeleteImage(ctx context.Context, req *mcp.CallToolRequest, input core.Delet
 		return nil, core.WorkbenchOutput{}, err
 	}
 
-	err = dyn.Resource(core.ImagesGVR).Namespace("redhat-ods-applications").Delete(ctx, input.ImageName, metav1.DeleteOptions{})
+	err = dyn.Resource(core.ImagesGVR).Namespace(core.GetDefaultNamespace()).Delete(ctx, input.ImageName, metav1.DeleteOptions{})
 	if err != nil {
 		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to delete image %s: %v", input.ImageName, err)
 	}

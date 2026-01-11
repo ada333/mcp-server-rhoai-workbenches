@@ -32,7 +32,7 @@ func GetImages(ctx context.Context) ([]ImageDef, error) {
 		return nil, err
 	}
 
-	images, err := dyn.Resource(core.ImagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
+	images, err := dyn.Resource(core.ImagesGVR).Namespace(core.GetDefaultNamespace()).List(ctx, metav1.ListOptions{
 		LabelSelector: "opendatahub.io/notebook-image=true",
 	})
 	if err != nil {

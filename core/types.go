@@ -1,12 +1,23 @@
 package core
 
-import "k8s.io/apimachinery/pkg/runtime/schema"
+import (
+	"os"
+
+	"k8s.io/apimachinery/pkg/runtime/schema"
+)
 
 var WorkbenchesGVR = schema.GroupVersionResource{Group: "kubeflow.org", Version: "v1", Resource: "notebooks"}
 
 var PvcGVR = schema.GroupVersionResource{Group: "", Version: "v1", Resource: "persistentvolumeclaims"}
 
 var ImagesGVR = schema.GroupVersionResource{Group: "image.openshift.io", Version: "v1", Resource: "imagestreams"}
+
+func GetDefaultNamespace() string {
+	if ns := os.Getenv("DEFAULT_NAMESPACE"); ns != "" {
+		return ns
+	}
+	return "redhat-ods-applications"
+}
 
 type PodsOutput struct {
 	Pods string `json:"pods" jsonschema_description:"the list of pods"`

@@ -15,7 +15,7 @@ func NewUnstructuredImageForTest(name, displayName, repoURL string, versions []s
 	u := &unstructured.Unstructured{}
 	u.SetGroupVersionKind(core.ImagesGVR.GroupVersion().WithKind("ImageStream"))
 	u.SetName(name)
-	u.SetNamespace("redhat-ods-applications")
+	u.SetNamespace(core.GetDefaultNamespace())
 	u.SetLabels(map[string]string{
 		"opendatahub.io/notebook-image": "true",
 	})

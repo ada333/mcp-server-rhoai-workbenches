@@ -16,7 +16,7 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 		return nil, core.WorkbenchOutput{}, err
 	}
 
-	namespace := "redhat-ods-applications"
+	namespace := core.GetDefaultNamespace()
 
 	imageStream := &unstructured.Unstructured{
 		Object: map[string]interface{}{

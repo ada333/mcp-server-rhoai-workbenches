@@ -59,7 +59,7 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 					"notebooks.opendatahub.io/last-image-selection":                    fmt.Sprintf("%s:%s", imageName, input.ImageTag),
 					"notebooks.opendatahub.io/last-image-version-git-commit-selection": gitCommit,
 					"opendatahub.io/hardware-profile-name":                             "default-profile",
-					"opendatahub.io/hardware-profile-namespace":                        "redhat-ods-applications",
+					"opendatahub.io/hardware-profile-namespace":                        core.GetDefaultNamespace(),
 				},
 			},
 			"spec": map[string]interface{}{
@@ -178,7 +178,7 @@ func GetImageInfo(ctx context.Context, displayName, version string) (string, str
 		return "", "", "", err
 	}
 
-	images, err := dyn.Resource(core.ImagesGVR).Namespace("redhat-ods-applications").List(ctx, metav1.ListOptions{
+	images, err := dyn.Resource(core.ImagesGVR).Namespace(core.GetDefaultNamespace()).List(ctx, metav1.ListOptions{
 		LabelSelector: "opendatahub.io/notebook-image=true",
 	})
 	if err != nil {
