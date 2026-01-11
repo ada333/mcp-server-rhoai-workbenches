@@ -7,16 +7,10 @@ import (
 	"github.com/amaly/mcp-server-rhoai/prompts"
 	"github.com/amaly/mcp-server-rhoai/resources"
 	"github.com/amaly/mcp-server-rhoai/tools"
-	"github.com/joho/godotenv"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func main() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
-	}
-
 	server := mcp.NewServer(&mcp.Implementation{
 		Name:    "workbencheslist",
 		Version: "v1.0.0",
