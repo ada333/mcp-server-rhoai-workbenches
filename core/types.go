@@ -65,3 +65,12 @@ type CreateCustomImageInput struct {
 	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`
 	ImageDescription string `json:"imageDescription" jsonschema_description:"the description of the image"`
 }
+
+type DeleteWorkbenchInput struct {
+	Namespace     string `json:"namespace" jsonschema_description:"the namespace of the workbench"`
+	WorkbenchName string `json:"workbenchName" jsonschema_description:"the name of the workbench"`
+}
+
+type DeleteImageInput struct {
+	ImageName string `json:"imageName" jsonschema_description:"the name of the image"`
+}

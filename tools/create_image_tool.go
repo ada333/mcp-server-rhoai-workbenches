@@ -68,8 +68,8 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 
 	_, err = dyn.Resource(core.ImagesGVR).Namespace(namespace).Create(ctx, imageStream, metav1.CreateOptions{})
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create notebook: %v", err)
+		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create image: %v", err)
 	}
 
-	return nil, core.WorkbenchOutput{Message: "Workbench was succesfully created!"}, nil
+	return nil, core.WorkbenchOutput{Message: "Image was successfully created!"}, nil
 }

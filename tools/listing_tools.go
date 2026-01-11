@@ -74,7 +74,18 @@ func ListImages(ctx context.Context, req *mcp.CallToolRequest, input core.ListWo
 
 	msg := ""
 	for _, image := range images {
-		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Annotations["opendatahub.io/notebook-image-name"], image.URL, strings.Join(image.Versions, "\n"))
+		var versions []string
+		for _, v := range image.Versions {
+			vInfo := v.Name
+			if v.PythonDependencies != "" {
+				vInfo += fmt.Sprintf(" (Python: %s)", v.PythonDependencies)
+			}
+			if v.Software != "" {
+				vInfo += fmt.Sprintf(" (Software: %s)", v.Software)
+			}
+			versions = append(versions, vInfo)
+		}
+		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Annotations["opendatahub.io/notebook-image-name"], image.URL, strings.Join(versions, ", "))
 	}
 	return nil, core.ListImagesOutput{Images: msg}, nil
 }

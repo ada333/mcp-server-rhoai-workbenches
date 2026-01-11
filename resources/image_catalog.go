@@ -14,10 +14,16 @@ import (
 
 var GetDynamicClient = func() (dynamic.Interface, error) { return core.LogIntoClusterDynamic() }
 
+type VersionDef struct {
+	Name               string `json:"name"`
+	PythonDependencies string `json:"python_dependencies"`
+	Software           string `json:"software"`
+}
+
 type ImageDef struct {
 	Annotations map[string]string `json:"annotations"`
 	URL         string            `json:"url"`
-	Versions    []string          `json:"versions"`
+	Versions    []VersionDef      `json:"versions"`
 }
 
 func GetImages(ctx context.Context) ([]ImageDef, error) {
@@ -44,12 +50,27 @@ func GetImages(ctx context.Context) ([]ImageDef, error) {
 
 		tagsRaw, _, _ := unstructured.NestedSlice(image.Object, "spec", "tags")
 
-		var versions []string
+		var versions []VersionDef
 		for _, t := range tagsRaw {
 			tagMap, ok := t.(map[string]interface{})
 			if ok {
 				tagName, _ := tagMap["name"].(string)
-				versions = append(versions, tagName)
+
+				var pyDeps, software string
+				if tagAnnotations, ok := tagMap["annotations"].(map[string]interface{}); ok {
+					if v, ok := tagAnnotations["opendatahub.io/notebook-python-dependencies"].(string); ok {
+						pyDeps = v
+					}
+					if v, ok := tagAnnotations["opendatahub.io/notebook-software"].(string); ok {
+						software = v
+					}
+				}
+
+				versions = append(versions, VersionDef{
+					Name:               tagName,
+					PythonDependencies: pyDeps,
+					Software:           software,
+				})
 			}
 		}
 

@@ -51,6 +51,16 @@ func main() {
 		Description: "create a new workbench with given name, image and image URL in a given project namespace",
 	}, tools.CreateWorkbench)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Delete Workbench",
+		Description: "delete a workbench with given name in a given project namespace",
+	}, tools.DeleteWorkbench)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Delete Image",
+		Description: "delete an image with given name",
+	}, tools.DeleteImage)
+
 	server.AddResource(&mcp.Resource{
 		URI:         "resource://mcp-server-rhoai/images",
 		Name:        "Image Catalog",

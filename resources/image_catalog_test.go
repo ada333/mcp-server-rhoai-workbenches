@@ -69,10 +69,10 @@ func TestGetImages(t *testing.T) {
 			hasV1 := false
 			hasV2 := false
 			for _, v := range img.Versions {
-				if v == "v1" {
+				if v.Name == "v1" {
 					hasV1 = true
 				}
-				if v == "v2" {
+				if v.Name == "v2" {
 					hasV2 = true
 				}
 			}
