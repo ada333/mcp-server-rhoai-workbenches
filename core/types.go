@@ -12,6 +12,8 @@ var PvcGVR = schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pe
 
 var ImagesGVR = schema.GroupVersionResource{Group: "image.openshift.io", Version: "v1", Resource: "imagestreams"}
 
+var HardwareProfilesGVR = schema.GroupVersionResource{Group: "infrastructure.opendatahub.io", Version: "v1", Resource: "hardwareprofiles"}
+
 func GetDefaultNamespace() string {
 	if ns := os.Getenv("DEFAULT_NAMESPACE"); ns != "" {
 		return ns
@@ -37,8 +39,8 @@ type ChangeWorkbenchStatusInput struct {
 	Status        WorkbenchStatus `json:"status" jsonschema_description:"the status of the workbench"`
 }
 
-type WorkbenchOutput struct {
-	Message string `json:"message" jsonschema_description:"the message with result of workbench change"`
+type DefaultToolOutput struct {
+	Message string `json:"message" jsonschema_description:"the message with result of the tool execution"`
 }
 
 type WorkbenchStatus int
@@ -84,4 +86,27 @@ type DeleteWorkbenchInput struct {
 
 type DeleteImageInput struct {
 	ImageName string `json:"imageName" jsonschema_description:"the name of the image"`
+}
+
+type HardwareProfileOutput struct {
+	Message         string `json:"message" jsonschema_description:"the message with result of hardware profile creation"`
+	HardwareProfile string `json:"hardwareProfile" jsonschema_description:"the hardware profile created"`
+}
+
+type CreateHardwareProfileInput struct {
+	HardwareProfileName string                    `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
+	Resources           []HardwareProfileResource `json:"resources" jsonschema_description:"the resources of the hardware profile"`
+}
+
+type HardwareProfileResource struct {
+	ResourceName       string `json:"resourceName" jsonschema_description:"the name of the resource"`
+	ResourceIdentifier string `json:"resourceIdentifier" jsonschema_description:"the identifier of the resource"`
+	ResourceType       string `json:"resourceType" jsonschema_description:"the type of the resource"`
+	DefaultCount       string `json:"defaultCount" jsonschema_description:"the default count of the resource"`
+	MaxCount           string `json:"maxCount" jsonschema_description:"the max count of the resource"`
+	MinCount           string `json:"minCount" jsonschema_description:"the min count of the resource"`
+}
+
+type DeleteHardwareProfileInput struct {
+	HardwareProfileName string `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
 }

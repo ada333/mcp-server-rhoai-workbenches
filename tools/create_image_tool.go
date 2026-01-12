@@ -10,10 +10,10 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core.CreateCustomImageInput) (*mcp.CallToolResult, core.WorkbenchOutput, error) {
+func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core.CreateCustomImageInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, err
+		return nil, core.DefaultToolOutput{}, err
 	}
 
 	namespace := core.GetDefaultNamespace()
@@ -68,8 +68,8 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 
 	_, err = dyn.Resource(core.ImagesGVR).Namespace(namespace).Create(ctx, imageStream, metav1.CreateOptions{})
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create image: %v", err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to create image: %v", err)
 	}
 
-	return nil, core.WorkbenchOutput{Message: "Image was successfully created!"}, nil
+	return nil, core.DefaultToolOutput{Message: "Image was successfully created!"}, nil
 }

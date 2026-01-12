@@ -28,18 +28,18 @@ func IsWorkbenchStopped(ctx context.Context, dyn dynamic.Interface, namespace, w
 	return currentStopped, nil
 }
 
-func ChangeWorkbenchStatus(ctx context.Context, req *mcp.CallToolRequest, input core.ChangeWorkbenchStatusInput) (*mcp.CallToolResult, core.WorkbenchOutput, error) {
+func ChangeWorkbenchStatus(ctx context.Context, req *mcp.CallToolRequest, input core.ChangeWorkbenchStatusInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, err
+		return nil, core.DefaultToolOutput{}, err
 	}
 
 	stopped, err := IsWorkbenchStopped(ctx, dyn, input.Namespace, input.WorkbenchName)
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, err
+		return nil, core.DefaultToolOutput{}, err
 	}
 	if (input.Status == core.Stopped && stopped) || (input.Status == core.Running && !stopped) {
-		return nil, core.WorkbenchOutput{Message: fmt.Sprintf("Workbench %s is already %s", input.WorkbenchName, input.Status)}, nil
+		return nil, core.DefaultToolOutput{Message: fmt.Sprintf("Workbench %s is already %s", input.WorkbenchName, input.Status)}, nil
 	}
 
 	patch := map[string]interface{}{}
@@ -55,7 +55,7 @@ func ChangeWorkbenchStatus(ctx context.Context, req *mcp.CallToolRequest, input 
 
 	patchBytes, err := json.Marshal(patch)
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to marshal patch: %v", err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to marshal patch: %v", err)
 	}
 
 	_, err = dyn.Resource(core.WorkbenchesGVR).Namespace(input.Namespace).Patch(
@@ -66,8 +66,8 @@ func ChangeWorkbenchStatus(ctx context.Context, req *mcp.CallToolRequest, input 
 		metav1.PatchOptions{},
 	)
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to %s workbench %s: %v", input.Status, input.WorkbenchName, err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to %s workbench %s: %v", input.Status, input.WorkbenchName, err)
 	}
 
-	return nil, core.WorkbenchOutput{Message: fmt.Sprintf("Workbench %s is %s", input.WorkbenchName, input.Status)}, nil
+	return nil, core.DefaultToolOutput{Message: fmt.Sprintf("Workbench %s is %s", input.WorkbenchName, input.Status)}, nil
 }

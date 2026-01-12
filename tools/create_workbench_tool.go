@@ -12,20 +12,20 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
-func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.CreateWorkbenchInput) (*mcp.CallToolResult, core.WorkbenchOutput, error) {
+func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.CreateWorkbenchInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, err
+		return nil, core.DefaultToolOutput{}, err
 	}
 
 	repoURL, gitCommit, imageName, err := GetImageInfo(ctx, input.ImageDisplayName, input.ImageTag)
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to lookup image info: %v", err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to lookup image info: %v", err)
 	}
 
 	err = createPersistentVolumeClaim(ctx, dyn, input.Namespace, input.WorkbenchName, "10Gi")
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create PVC: %v", err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to create PVC: %v", err)
 	}
 
 	notebookArgs := fmt.Sprintf(`--ServerApp.port=8888
@@ -135,10 +135,10 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 
 	_, err = dyn.Resource(core.WorkbenchesGVR).Namespace(input.Namespace).Create(ctx, notebook, metav1.CreateOptions{})
 	if err != nil {
-		return nil, core.WorkbenchOutput{}, fmt.Errorf("failed to create notebook: %v", err)
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to create notebook: %v", err)
 	}
 
-	return nil, core.WorkbenchOutput{Message: "Workbench was succesfully created!"}, nil
+	return nil, core.DefaultToolOutput{Message: "Workbench was succesfully created!"}, nil
 }
 
 func createPersistentVolumeClaim(ctx context.Context, dyn dynamic.Interface, namespace, name, size string) error {

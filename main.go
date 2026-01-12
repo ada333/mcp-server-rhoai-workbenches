@@ -61,6 +61,16 @@ func main() {
 		Description: "delete an image with given name",
 	}, tools.DeleteImage)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Create Hardware Profile",
+		Description: "create a hardware profile with given name, description and resources",
+	}, tools.CreateHardwareProfile)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Delete Hardware Profile",
+		Description: "delete a hardware profile with given name",
+	}, tools.DeleteHardwareProfile)
+
 	server.AddResource(&mcp.Resource{
 		URI:         "resource://mcp-server-rhoai/images",
 		Name:        "Image Catalog",
@@ -69,7 +79,7 @@ func main() {
 	}, resources.ImagesResourceHandler)
 
 	server.AddPrompt(&mcp.Prompt{
-		Name:        "create-workbench",
+		Name:        "create-workbench-prompt",
 		Description: "Guide to create a workbench",
 		Arguments: []*mcp.PromptArgument{
 			{Name: "namespace", Description: "Target namespace", Required: true},
