@@ -24,7 +24,6 @@ func ListPods(ctx context.Context, req *mcp.CallToolRequest, input core.ListWork
 		return nil, core.PodsOutput{}, err
 	}
 
-	// list pods - this should be only code in the func
 	pods, err := clientset.CoreV1().Pods(input.Namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, core.PodsOutput{}, fmt.Errorf("failed to list pods: %v", err)
@@ -88,4 +87,35 @@ func ListImages(ctx context.Context, req *mcp.CallToolRequest, input core.ListWo
 		msg += fmt.Sprintf("Image: %s\n URL: %s\n Versions: %s\n", image.Annotations["opendatahub.io/notebook-image-name"], image.URL, strings.Join(versions, ", "))
 	}
 	return nil, core.ListImagesOutput{Images: msg}, nil
+}
+
+func ListNamespaces(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, core.ListNamespacesOutput, error) {
+	namespaces, err := GetAllNamespaces(ctx)
+	if err != nil {
+		return nil, core.ListNamespacesOutput{}, err
+	}
+
+	msg := ""
+	for _, ns := range namespaces {
+		msg += fmt.Sprintf("- %s\n", ns)
+	}
+	return nil, core.ListNamespacesOutput{Namespaces: msg}, nil
+}
+
+func GetAllNamespaces(ctx context.Context) ([]string, error) {
+	clientset, err := GetClientSet()
+	if err != nil {
+		return nil, err
+	}
+
+	namespaces, err := clientset.CoreV1().Namespaces().List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to list namespaces: %v", err)
+	}
+
+	var names []string
+	for _, ns := range namespaces.Items {
+		names = append(names, ns.Name)
+	}
+	return names, nil
 }

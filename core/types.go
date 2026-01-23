@@ -73,6 +73,10 @@ type ListImagesOutput struct {
 	Images string `json:"images" jsonschema_description:"the list of images"`
 }
 
+type ListNamespacesOutput struct {
+	Namespaces string `json:"namespaces" jsonschema_description:"the list of namespaces"`
+}
+
 type CreateCustomImageInput struct {
 	ImageLocation    string `json:"imageLocation" jsonschema_description:"the location of the image"`
 	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`

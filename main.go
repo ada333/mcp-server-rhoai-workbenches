@@ -42,6 +42,11 @@ func main() {
 	}, tools.ListImages)
 
 	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Namespaces",
+		Description: "list all namespaces in the cluster",
+	}, tools.ListNamespaces)
+
+	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create Custom Image",
 		Description: "create a new custom notebook image",
 	}, tools.CreateCustomImage)
