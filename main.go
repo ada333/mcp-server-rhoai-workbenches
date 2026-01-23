@@ -83,6 +83,13 @@ func main() {
 		MIMEType:    "application/json",
 	}, resources.ImagesResourceHandler)
 
+	server.AddResource(&mcp.Resource{
+		URI:         "resource://mcp-server-rhoai/hardware-resources",
+		Name:        "Hardware Resources",
+		Description: "List of available hardware resources",
+		MIMEType:    "application/json",
+	}, resources.DefaultHardwareResourceHandler)
+
 	server.AddPrompt(&mcp.Prompt{
 		Name:        "create-workbench-prompt",
 		Description: "Guide to create a workbench",

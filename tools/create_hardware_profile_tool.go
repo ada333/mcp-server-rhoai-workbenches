@@ -35,7 +35,7 @@ func CreateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input 
 		"opendatahub.io/dashboard-feature-visibility": "[]",
 		"opendatahub.io/disabled":                     "false",
 		"opendatahub.io/display-name":                 input.HardwareProfileName,
-		"opendatahub.io/modified-date":                time.Now().Format("2006-01-02T15:04:05.000Z"),
+		"opendatahub.io/modified-date":                time.Now().UTC().Format("2006-01-02T15:04:05.000Z"),
 	}
 
 	hardwareProfile := &unstructured.Unstructured{
