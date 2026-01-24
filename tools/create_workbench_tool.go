@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	core "github.com/amaly/mcp-server-rhoai/core"
+	"github.com/amaly/mcp-server-rhoai/resources"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -39,6 +40,20 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 		imageFull = fmt.Sprintf("%s:%s", repoURL, input.ImageTag)
 	}
 
+	var hardwareProfile core.HardwareProfile
+	if input.HardwareProfile.HardwareProfileName != "" {
+		hardwareProfile = input.HardwareProfile
+	} else {
+		hardwareProfile = resources.GetDefaultHardwareProfile()
+	}
+
+	limits := make(map[string]interface{})
+	requests := make(map[string]interface{})
+	for _, resource := range hardwareProfile.Resources {
+		limits[resource.ResourceIdentifier] = resource.MaxCount
+		requests[resource.ResourceIdentifier] = resource.DefaultCount
+	}
+
 	notebook := &unstructured.Unstructured{
 		Object: map[string]interface{}{
 			"apiVersion": "kubeflow.org/v1",
@@ -58,7 +73,7 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 					"notebooks.opendatahub.io/inject-auth":                             "true",
 					"notebooks.opendatahub.io/last-image-selection":                    fmt.Sprintf("%s:%s", imageName, input.ImageTag),
 					"notebooks.opendatahub.io/last-image-version-git-commit-selection": gitCommit,
-					"opendatahub.io/hardware-profile-name":                             "default-profile",
+					"opendatahub.io/hardware-profile-name":                             hardwareProfile.HardwareProfileName,
 					"opendatahub.io/hardware-profile-namespace":                        core.GetDefaultNamespace(),
 				},
 			},
@@ -91,14 +106,8 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 									},
 								},
 								"resources": map[string]interface{}{
-									"limits": map[string]interface{}{
-										"cpu":    "2",
-										"memory": "4Gi",
-									},
-									"requests": map[string]interface{}{
-										"cpu":    "2",
-										"memory": "4Gi",
-									},
+									"limits":   limits,
+									"requests": requests,
 								},
 								"volumeMounts": []interface{}{
 									map[string]interface{}{

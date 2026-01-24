@@ -11,7 +11,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func CreateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.CreateHardwareProfileInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
+func CreateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.HardwareProfile) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
 		return nil, core.DefaultToolOutput{}, err

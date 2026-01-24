@@ -63,10 +63,11 @@ func (s WorkbenchStatus) String() string {
 }
 
 type CreateWorkbenchInput struct {
-	Namespace        string `json:"namespace" jsonschema_description:"the namespace of the workbench"`
-	WorkbenchName    string `json:"workbenchName" jsonschema_description:"the name of the workbench"`
-	ImageDisplayName string `json:"imageDisplayName" jsonschema_description:"the image display name - f.e. Jupyter | Data Science | CPU | Python 3.12"`
-	ImageTag         string `json:"imageTag" jsonschema_description:"the image tag "`
+	Namespace        string          `json:"namespace" jsonschema_description:"the namespace of the workbench"`
+	WorkbenchName    string          `json:"workbenchName" jsonschema_description:"the name of the workbench"`
+	ImageDisplayName string          `json:"imageDisplayName" jsonschema_description:"the image display name - f.e. Jupyter | Data Science | CPU | Python 3.12"`
+	ImageTag         string          `json:"imageTag" jsonschema_description:"the image tag "`
+	HardwareProfile  HardwareProfile `json:"hardwareProfile" jsonschema_description:"the hardware profile to use"`
 }
 
 type ListImagesOutput struct {
@@ -97,7 +98,7 @@ type HardwareProfileOutput struct {
 	HardwareProfile string `json:"hardwareProfile" jsonschema_description:"the hardware profile created"`
 }
 
-type CreateHardwareProfileInput struct {
+type HardwareProfile struct {
 	HardwareProfileName string                    `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
 	Resources           []HardwareProfileResource `json:"resources" jsonschema_description:"the resources of the hardware profile"`
 }
