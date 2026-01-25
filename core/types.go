@@ -98,6 +98,10 @@ type HardwareProfileOutput struct {
 	HardwareProfile string `json:"hardwareProfile" jsonschema_description:"the hardware profile created"`
 }
 
+type ListHardwareProfilesOutput struct {
+	HardwareProfiles []HardwareProfile `json:"hardwareProfiles" jsonschema_description:"the list of hardware profiles"`
+}
+
 type HardwareProfile struct {
 	HardwareProfileName string                    `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
 	Resources           []HardwareProfileResource `json:"resources" jsonschema_description:"the resources of the hardware profile"`

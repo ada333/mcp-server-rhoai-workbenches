@@ -76,6 +76,11 @@ func main() {
 		Description: "delete a hardware profile with given name",
 	}, tools.DeleteHardwareProfile)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Hardware Profiles",
+		Description: "list the hardware profiles in a given project namespace",
+	}, tools.ListHardwareProfiles)
+
 	server.AddResource(&mcp.Resource{
 		URI:         "resource://mcp-server-rhoai/images",
 		Name:        "Image Catalog",

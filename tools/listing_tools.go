@@ -9,6 +9,7 @@ import (
 	"github.com/amaly/mcp-server-rhoai/resources"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes"
 )
@@ -118,4 +119,69 @@ func GetAllNamespaces(ctx context.Context) ([]string, error) {
 		names = append(names, ns.Name)
 	}
 	return names, nil
+}
+
+func convertToString(val interface{}) string {
+	switch v := val.(type) {
+	case string:
+		return v
+	case int:
+		return fmt.Sprintf("%d", v)
+	case int64:
+		return fmt.Sprintf("%d", v)
+	case float64:
+		return fmt.Sprintf("%.0f", v)
+	default:
+		return ""
+	}
+}
+
+func ListHardwareProfiles(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, core.ListHardwareProfilesOutput, error) {
+	dyn, err := GetDynamicClient()
+	if err != nil {
+		return nil, core.ListHardwareProfilesOutput{}, err
+	}
+
+	hardwareProfiles, err := dyn.Resource(core.HardwareProfilesGVR).Namespace(core.GetDefaultNamespace()).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, core.ListHardwareProfilesOutput{}, fmt.Errorf("failed to list hardware profiles: %v", err)
+	}
+
+	var result []core.HardwareProfile
+	for _, profile := range hardwareProfiles.Items {
+		identifiers, foundIdentifiers, err := unstructured.NestedSlice(profile.Object, "spec", "identifiers")
+		if !foundIdentifiers || err != nil {
+			continue
+		}
+
+		resources := make([]core.HardwareProfileResource, 0, len(identifiers))
+		for _, identifier := range identifiers {
+			identifierMap, okIdentifierMap := identifier.(map[string]interface{})
+			if !okIdentifierMap {
+				continue
+			}
+
+			displayName, _ := identifierMap["displayName"].(string)
+			identifierStr, _ := identifierMap["identifier"].(string)
+			resourceType, _ := identifierMap["resourceType"].(string)
+			defaultCount := convertToString(identifierMap["defaultCount"])
+			maxCount := convertToString(identifierMap["maxCount"])
+			minCount := convertToString(identifierMap["minCount"])
+
+			resources = append(resources, core.HardwareProfileResource{
+				ResourceName:       displayName,
+				ResourceIdentifier: identifierStr,
+				ResourceType:       resourceType,
+				DefaultCount:       defaultCount,
+				MaxCount:           maxCount,
+				MinCount:           minCount,
+			})
+		}
+
+		result = append(result, core.HardwareProfile{
+			HardwareProfileName: profile.GetName(),
+			Resources:           resources,
+		})
+	}
+	return nil, core.ListHardwareProfilesOutput{HardwareProfiles: result}, nil
 }
