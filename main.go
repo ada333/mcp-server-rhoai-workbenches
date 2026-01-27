@@ -81,6 +81,16 @@ func main() {
 		Description: "list the hardware profiles in a given project namespace",
 	}, tools.ListHardwareProfiles)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "Create PVC",
+		Description: "create a persistent volume claim with given name and size in a given project namespace",
+	}, tools.CreatePVCTool)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List PVCs",
+		Description: "list the persistent volume claims in a given project namespace",
+	}, tools.ListPVCs)
+
 	server.AddResource(&mcp.Resource{
 		URI:         "resource://mcp-server-rhoai/images",
 		Name:        "Image Catalog",

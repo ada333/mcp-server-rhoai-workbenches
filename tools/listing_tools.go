@@ -185,3 +185,21 @@ func ListHardwareProfiles(ctx context.Context, req *mcp.CallToolRequest, input s
 	}
 	return nil, core.ListHardwareProfilesOutput{HardwareProfiles: result}, nil
 }
+
+func ListPVCs(ctx context.Context, req *mcp.CallToolRequest, input core.ListPVCsInput) (*mcp.CallToolResult, core.PVCsOutput, error) {
+	dyn, err := GetDynamicClient()
+	if err != nil {
+		return nil, core.PVCsOutput{}, err
+	}
+
+	pvcs, err := dyn.Resource(core.PvcGVR).Namespace(input.Namespace).List(ctx, metav1.ListOptions{})
+	if err != nil {
+		return nil, core.PVCsOutput{}, fmt.Errorf("failed to list PVCs: %v", err)
+	}
+
+	msg := ""
+	for _, pvc := range pvcs.Items {
+		msg += fmt.Sprintf("- %s\n", pvc.GetName())
+	}
+	return nil, core.PVCsOutput{PVCs: msg}, nil
+}

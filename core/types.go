@@ -68,6 +68,7 @@ type CreateWorkbenchInput struct {
 	ImageDisplayName string          `json:"imageDisplayName" jsonschema_description:"the image display name - f.e. Jupyter | Data Science | CPU | Python 3.12"`
 	ImageTag         string          `json:"imageTag" jsonschema_description:"the image tag "`
 	HardwareProfile  HardwareProfile `json:"hardwareProfile" jsonschema_description:"the hardware profile to use"`
+	PVCName          string          `json:"pvcName" jsonschema_description:"the name of the PVC"`
 }
 
 type ListImagesOutput struct {
@@ -118,4 +119,18 @@ type HardwareProfileResource struct {
 
 type DeleteHardwareProfileInput struct {
 	HardwareProfileName string `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
+}
+
+type CreatePVCInput struct {
+	Namespace string `json:"namespace" jsonschema_description:"the namespace of the PVC"`
+	PVCName   string `json:"pvcName" jsonschema_description:"the name of the PVC"`
+	Size      string `json:"size" jsonschema_description:"the size of the PVC"`
+}
+
+type PVCsOutput struct {
+	PVCs string `json:"pvcs" jsonschema_description:"the list of PVCs"`
+}
+
+type ListPVCsInput struct {
+	Namespace string `json:"namespace" jsonschema_description:"the namespace of the PVC"`
 }

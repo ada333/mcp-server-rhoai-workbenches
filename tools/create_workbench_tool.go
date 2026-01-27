@@ -24,9 +24,12 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to lookup image info: %v", err)
 	}
 
-	err = createPersistentVolumeClaim(ctx, dyn, input.Namespace, input.WorkbenchName, "10Gi")
-	if err != nil {
-		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to create PVC: %v", err)
+	if input.PVCName == "" {
+		input.PVCName = input.WorkbenchName
+		err = createPersistentVolumeClaim(ctx, dyn, input.Namespace, input.PVCName, "10Gi")
+		if err != nil {
+			return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to create PVC: %v", err)
+		}
 	}
 
 	notebookArgs := fmt.Sprintf(`--ServerApp.port=8888
@@ -125,7 +128,7 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 							map[string]interface{}{
 								"name": "storage-volume",
 								"persistentVolumeClaim": map[string]interface{}{
-									"claimName": input.WorkbenchName,
+									"claimName": input.PVCName,
 								},
 							},
 							map[string]interface{}{
