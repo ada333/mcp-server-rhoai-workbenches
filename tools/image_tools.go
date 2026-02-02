@@ -132,23 +132,17 @@ func ImageIsUsed(ctx context.Context, imageName string) (bool, error) {
 		return false, err
 	}
 
-	namespaces, err := GetAllNamespaces(ctx)
+	workbenches, err := dyn.Resource(core.WorkbenchesGVR).Namespace("").List(ctx, metav1.ListOptions{})
 	if err != nil {
-		return false, fmt.Errorf("failed to get namespaces: %v", err)
+		return false, fmt.Errorf("failed to list workbenches: %v", err)
 	}
 
-	for _, namespace := range namespaces {
-		workbenches, err := dyn.Resource(core.WorkbenchesGVR).Namespace(namespace).List(ctx, metav1.ListOptions{})
-		if err != nil {
-			continue
-		}
-
-		for _, workbench := range workbenches.Items {
-			if workbench.GetAnnotations()["opendatahub.io/image-display-name"] == imageName {
-				return true, nil
-			}
+	for _, workbench := range workbenches.Items {
+		if workbench.GetAnnotations()["opendatahub.io/image-display-name"] == imageName {
+			return true, nil
 		}
 	}
+
 	return false, nil
 }
 
