@@ -81,10 +81,10 @@ func TestListWorkbenches(t *testing.T) {
 		t.Fatalf("ListWorkbenches returned error: %v", err)
 	}
 
-	if !strings.Contains(out.Workbenches, "- wb-1\n") {
+	if !strings.Contains(out.Workbenches[0].Name, "wb-1") {
 		t.Errorf("expected wb-1 in output, got: %q", out.Workbenches)
 	}
-	if strings.Contains(out.Workbenches, "wb-other") {
+	if strings.Contains(out.Workbenches[1].Name, "wb-other") {
 		t.Errorf("did not expect wb-other in output, got: %q", out.Workbenches)
 	}
 }
@@ -108,10 +108,10 @@ func TestListAllWorkbenches(t *testing.T) {
 		t.Fatalf("ListAllWorkbenches returned error: %v", err)
 	}
 
-	if !strings.Contains(out.Workbenches, "- wb-1\n") {
+	if !strings.Contains(out.Workbenches[0].Name, "wb-1") {
 		t.Errorf("expected wb-1 in output, got: %q", out.Workbenches)
 	}
-	if !strings.Contains(out.Workbenches, "- wb-2\n") {
+	if !strings.Contains(out.Workbenches[1].Name, "wb-2") {
 		t.Errorf("expected wb-2 in output, got: %q", out.Workbenches)
 	}
 }

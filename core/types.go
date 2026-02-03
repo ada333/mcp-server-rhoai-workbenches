@@ -25,8 +25,23 @@ type PodsOutput struct {
 	Pods string `json:"pods" jsonschema_description:"the list of pods"`
 }
 
+type WorkbenchInfo struct {
+	Name             string `json:"name" jsonschema_description:"the name of the workbench"`
+	User             string `json:"user" jsonschema_description:"the user of the workbench"`
+	Status           string `json:"status" jsonschema_description:"the status of the workbench"`
+	ImageDisplayName string `json:"image" jsonschema_description:"the image of the workbench"`
+	ImageTag         string `json:"imageTag" jsonschema_description:"the image tag of the workbench"`
+	HardwareProfile  string `json:"hardwareProfile" jsonschema_description:"the name of the hardware profile of the workbench"`
+	PVCName          string `json:"pvcName" jsonschema_description:"the name of the PVC of the workbench"`
+	Namespace        string `json:"namespace" jsonschema_description:"the namespace of the workbench"`
+	Uptime           string `json:"uptime" jsonschema_description:"the uptime of the workbench"`
+	CPUUsage         string `json:"cpuUsage" jsonschema_description:"the CPU usage of the workbench"`
+	MemoryUsage      string `json:"memoryUsage" jsonschema_description:"the memory usage of the workbench"`
+	DiskUsage        string `json:"diskUsage" jsonschema_description:"the disk usage of the workbench"`
+}
+
 type ListWorkbenchesResult struct {
-	Workbenches string `json:"workbenches" jsonschema_description:"the list of workbenches"`
+	Workbenches []WorkbenchInfo `json:"workbenches" jsonschema_description:"the list of workbenches"`
 }
 
 type ListWorkbenchesInput struct {

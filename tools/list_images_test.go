@@ -53,7 +53,7 @@ func TestListImages(t *testing.T) {
 		return client, nil
 	}
 
-	_, out, err := ListImages(context.Background(), nil, core.ListWorkbenchesInput{})
+	_, out, err := ListImages(context.Background(), nil, struct{}{})
 	if err != nil {
 		t.Fatalf("ListImages returned error: %v", err)
 	}

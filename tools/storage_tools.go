@@ -73,3 +73,18 @@ func createPersistentVolumeClaim(ctx context.Context, dyn dynamic.Interface, nam
 	}
 	return nil
 }
+
+func getDiskUsageFromPVC(ctx context.Context, dyn dynamic.Interface, namespace, pvcName string) (string, error) {
+	pvc, err := dyn.Resource(core.PvcGVR).Namespace(namespace).Get(ctx, pvcName, metav1.GetOptions{})
+	if err != nil {
+		return "", fmt.Errorf("failed to get PVC: %v", err)
+	}
+	capacity, found, err := unstructured.NestedString(pvc.Object, "spec", "resources", "requests", "storage")
+	if err != nil {
+		return "", fmt.Errorf("failed to get storage capacity: %v", err)
+	}
+	if !found {
+		return "", nil
+	}
+	return capacity, nil
+}

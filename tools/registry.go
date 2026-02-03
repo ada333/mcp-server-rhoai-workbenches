@@ -55,7 +55,7 @@ func registerWorkbenchTools(server *mcp.Server) {
 func registerImageTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Images",
-		Description: "list the images in a given project namespace",
+		Description: "list all available notebook images",
 	}, ListImages)
 
 	mcp.AddTool(server, &mcp.Tool{

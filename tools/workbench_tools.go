@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 	"time"
 
 	core "github.com/amaly/mcp-server-rhoai/core"
@@ -15,23 +16,116 @@ import (
 	"k8s.io/client-go/dynamic"
 )
 
+func getPVCNameFromWorkbench(wb *unstructured.Unstructured) (string, error) {
+	volumes, found, err := unstructured.NestedSlice(wb.Object, "spec", "template", "spec", "volumes")
+	if err != nil {
+		return "", fmt.Errorf("failed to get volumes: %v", err)
+	}
+	if !found {
+		return "", nil
+	}
+
+	for _, vol := range volumes {
+		volMap, ok := vol.(map[string]interface{})
+		if !ok {
+			continue
+		}
+		if pvc, found, _ := unstructured.NestedString(volMap, "persistentVolumeClaim", "claimName"); found {
+			return pvc, nil
+		}
+	}
+	return "", nil
+}
+
+func getResourceRequestsFromWorkbench(wb *unstructured.Unstructured) (cpuRequest, memoryRequest string, err error) {
+	containers, found, err := unstructured.NestedSlice(wb.Object, "spec", "template", "spec", "containers")
+	if err != nil {
+		return "", "", fmt.Errorf("failed to get containers: %v", err)
+	}
+	if !found || len(containers) == 0 {
+		return "", "", nil
+	}
+
+	container, ok := containers[0].(map[string]interface{})
+	if !ok {
+		return "", "", nil
+	}
+
+	requests, found, err := unstructured.NestedStringMap(container, "resources", "requests")
+	if err != nil {
+		return "", "", fmt.Errorf("failed to get resource requests: %v", err)
+	}
+	if !found {
+		return "", "", nil
+	}
+
+	cpuRequest = requests["cpu"]
+	memoryRequest = requests["memory"]
+	return cpuRequest, memoryRequest, nil
+}
+
+// lists workbenches in a given namespace
 func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.ListWorkbenchesInput) (*mcp.CallToolResult, core.ListWorkbenchesResult, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
 		return nil, core.ListWorkbenchesResult{}, err
 	}
 
-	notebooks, err := dyn.Resource(core.WorkbenchesGVR).Namespace(input.Namespace).List(ctx, metav1.ListOptions{})
+	workbenches, err := dyn.Resource(core.WorkbenchesGVR).Namespace(input.Namespace).List(ctx, metav1.ListOptions{})
 	if err != nil {
 		return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to list workbenches: %v", err)
 	}
 
-	msg := ""
-	for _, nb := range notebooks.Items {
-		name := nb.GetName()
-		msg += fmt.Sprintf("- %s\n", name)
+	workbenchesInfo := []core.WorkbenchInfo{}
+	for _, wb := range workbenches.Items {
+		name := wb.GetName()
+		user := wb.GetAnnotations()["opendatahub.io/username"]
+		status := wb.GetAnnotations()["kubeflow-resource-stopped"]
+		imageDisplayName := wb.GetAnnotations()["opendatahub.io/image-display-name"]
+		imageTag := strings.Split(wb.GetAnnotations()["notebooks.opendatahub.io/last-image-selection"], ":")[1]
+		hardwareProfile := wb.GetAnnotations()["opendatahub.io/hardware-profile-name"]
+		namespace := wb.GetNamespace()
+		pvcName, err := getPVCNameFromWorkbench(&wb)
+		if err != nil {
+			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get PVC name for workbench %s: %v", name, err)
+		}
+
+		cpuRequest, memoryRequest, err := getResourceRequestsFromWorkbench(&wb)
+		if err != nil {
+			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get resource requests for workbench %s: %v", name, err)
+		}
+
+		uptime := "" // TODO
+
+		if status != "" {
+			status = "stopped"
+		} else {
+			status = "running"
+		}
+
+		diskUsage, err := getDiskUsageFromPVC(ctx, dyn, wb.GetNamespace(), pvcName)
+		if err != nil {
+			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get disk usage for workbench %s: %v", name, err)
+		}
+
+		workbenchInfo := core.WorkbenchInfo{
+			Name:             name,
+			User:             user,
+			Status:           status,
+			ImageDisplayName: imageDisplayName,
+			ImageTag:         imageTag,
+			HardwareProfile:  hardwareProfile,
+			PVCName:          pvcName,
+			Namespace:        namespace,
+			Uptime:           uptime,
+			CPUUsage:         cpuRequest,
+			MemoryUsage:      memoryRequest,
+			DiskUsage:        diskUsage,
+		}
+		workbenchesInfo = append(workbenchesInfo, workbenchInfo)
+
 	}
-	return nil, core.ListWorkbenchesResult{Workbenches: msg}, nil
+	return nil, core.ListWorkbenchesResult{Workbenches: workbenchesInfo}, nil
 }
 
 func ListAllWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.ListWorkbenchesInput) (*mcp.CallToolResult, core.ListWorkbenchesResult, error) {
@@ -144,7 +238,7 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 								"volumeMounts": []interface{}{
 									map[string]interface{}{
 										"mountPath": "/opt/app-root/src/",
-										"name":      "storage-volume",
+										"name":      input.PVCName,
 									},
 									map[string]interface{}{
 										"mountPath": "/dev/shm",
@@ -155,7 +249,7 @@ func CreateWorkbench(ctx context.Context, req *mcp.CallToolRequest, input core.C
 						},
 						"volumes": []interface{}{
 							map[string]interface{}{
-								"name": "storage-volume",
+								"name": input.PVCName,
 								"persistentVolumeClaim": map[string]interface{}{
 									"claimName": input.PVCName,
 								},

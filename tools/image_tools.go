@@ -12,7 +12,7 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
-func ListImages(ctx context.Context, req *mcp.CallToolRequest, input core.ListWorkbenchesInput) (*mcp.CallToolResult, core.ListImagesOutput, error) {
+func ListImages(ctx context.Context, req *mcp.CallToolRequest, input struct{}) (*mcp.CallToolResult, core.ListImagesOutput, error) {
 	images, err := resources.GetImages(ctx)
 	if err != nil {
 		return nil, core.ListImagesOutput{}, err
