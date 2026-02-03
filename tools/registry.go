@@ -114,4 +114,9 @@ func registerResourceConsumptionTools(server *mcp.Server) {
 		Name:        "List Resource Consumption Per User",
 		Description: "list the resource consumption per user",
 	}, ListResourceConsumptionPerUser)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Resource Consumption Per Cluster",
+		Description: "list the resource consumption per cluster",
+	}, ListResourceConsumptionPerCluster)
 }
