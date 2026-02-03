@@ -9,6 +9,7 @@ func RegisterAllTools(server *mcp.Server) {
 	registerImageTools(server)
 	registerHardwareProfileTools(server)
 	registerStorageTools(server)
+	registerResourceConsumptionTools(server)
 }
 
 func registerPodTools(server *mcp.Server) {
@@ -96,4 +97,21 @@ func registerStorageTools(server *mcp.Server) {
 		Name:        "Create PVC",
 		Description: "create a persistent volume claim with given name and size in a given project namespace",
 	}, CreatePVCTool)
+}
+
+func registerResourceConsumptionTools(server *mcp.Server) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Resource Consumption Per Workbench",
+		Description: "list the resource consumption per workbench",
+	}, ListResourceConsumptionPerWorkbench)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Resource Consumption Per Namespace",
+		Description: "list the resource consumption per namespace",
+	}, ListResourceConsumptionPerNamespace)
+
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List Resource Consumption Per User",
+		Description: "list the resource consumption per user",
+	}, ListResourceConsumptionPerUser)
 }
