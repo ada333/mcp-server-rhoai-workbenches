@@ -86,7 +86,7 @@ func ListResourceConsumptionPerWorkbench(ctx context.Context, req *mcp.CallToolR
 }
 
 func ListResourceConsumptionPerNamespace(ctx context.Context, req *mcp.CallToolRequest, input core.ListResourceConsumptionPerNamespaceInput) (*mcp.CallToolResult, core.ListResourceConsumptionOutput, error) {
-	_, workbenches, err := ListWorkbenches(ctx, req, core.ListWorkbenchesInput{Namespace: input.Namespace})
+	_, workbenches, err := ListWorkbenches(ctx, req, core.ListWorkbenchesInput(input))
 	if err != nil {
 		return nil, core.ListResourceConsumptionOutput{}, err
 	}

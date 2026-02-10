@@ -81,11 +81,19 @@ func TestListWorkbenches(t *testing.T) {
 		t.Fatalf("ListWorkbenches returned error: %v", err)
 	}
 
-	if !strings.Contains(out.Workbenches[0].Name, "wb-1") {
-		t.Errorf("expected wb-1 in output, got: %q", out.Workbenches)
+	if len(out.Workbenches) != 1 {
+		t.Errorf("expected 1 workbench in namespace %s, got %d", ns, len(out.Workbenches))
 	}
-	if strings.Contains(out.Workbenches[1].Name, "wb-other") {
-		t.Errorf("did not expect wb-other in output, got: %q", out.Workbenches)
+
+	if len(out.Workbenches) > 0 && !strings.Contains(out.Workbenches[0].Name, "wb-1") {
+		t.Errorf("expected wb-1 in output, got: %q", out.Workbenches[0].Name)
+	}
+
+	// Verify wb-other is not in the list (it's in a different namespace)
+	for _, wb := range out.Workbenches {
+		if strings.Contains(wb.Name, "wb-other") {
+			t.Errorf("did not expect wb-other in output, got: %q", wb.Name)
+		}
 	}
 }
 

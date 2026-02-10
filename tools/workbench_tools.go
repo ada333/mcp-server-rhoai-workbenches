@@ -82,7 +82,16 @@ func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.L
 		user := wb.GetAnnotations()["opendatahub.io/username"]
 		status := wb.GetAnnotations()["kubeflow-resource-stopped"]
 		imageDisplayName := wb.GetAnnotations()["opendatahub.io/image-display-name"]
-		imageTag := strings.Split(wb.GetAnnotations()["notebooks.opendatahub.io/last-image-selection"], ":")[1]
+
+		imageTag := ""
+		lastImageSelection := wb.GetAnnotations()["notebooks.opendatahub.io/last-image-selection"]
+		if lastImageSelection != "" {
+			parts := strings.Split(lastImageSelection, ":")
+			if len(parts) > 1 {
+				imageTag = parts[1]
+			}
+		}
+
 		hardwareProfile := wb.GetAnnotations()["opendatahub.io/hardware-profile-name"]
 		namespace := wb.GetNamespace()
 		pvcName, err := getPVCNameFromWorkbench(&wb)
@@ -103,9 +112,12 @@ func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.L
 			status = "running"
 		}
 
-		diskUsage, err := getDiskUsageFromPVC(ctx, dyn, wb.GetNamespace(), pvcName)
-		if err != nil {
-			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get disk usage for workbench %s: %v", name, err)
+		diskUsage := ""
+		if pvcName != "" {
+			diskUsage, err = getDiskUsageFromPVC(ctx, dyn, wb.GetNamespace(), pvcName)
+			if err != nil {
+				return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get disk usage for workbench %s: %v", name, err)
+			}
 		}
 
 		workbenchInfo := core.WorkbenchInfo{

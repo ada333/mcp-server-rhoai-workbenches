@@ -26,14 +26,18 @@ func newUnstructuredImageForToolTest(name, displayName, repoURL string, versions
 	})
 
 	if repoURL != "" {
-		unstructured.SetNestedField(u.Object, repoURL, "status", "dockerImageRepository")
+		if err := unstructured.SetNestedField(u.Object, repoURL, "status", "dockerImageRepository"); err != nil {
+			panic(err)
+		}
 	}
 
 	tags := make([]interface{}, len(versions))
 	for i, v := range versions {
 		tags[i] = map[string]interface{}{"name": v}
 	}
-	unstructured.SetNestedSlice(u.Object, tags, "spec", "tags")
+	if err := unstructured.SetNestedSlice(u.Object, tags, "spec", "tags"); err != nil {
+		panic(err)
+	}
 
 	return u
 }
