@@ -102,21 +102,21 @@ func registerStorageTools(server *mcp.Server) {
 func registerResourceConsumptionTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Resource Consumption Per Workbench",
-		Description: "list the resource consumption per workbench",
+		Description: "list the resource consumption of given workbench in a given namespace",
 	}, ListResourceConsumptionPerWorkbench)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Resource Consumption Per Namespace",
-		Description: "list the resource consumption per namespace",
+		Description: "list the resource consumption of all workbenches in a given namespace",
 	}, ListResourceConsumptionPerNamespace)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Resource Consumption Per User",
-		Description: "list the resource consumption per user",
+		Description: "list the resource consumption of all workbenches of a given user",
 	}, ListResourceConsumptionPerUser)
 
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Resource Consumption Per Cluster",
-		Description: "list the resource consumption per cluster",
+		Description: "list the resource consumption of all workbenches in the cluster",
 	}, ListResourceConsumptionPerCluster)
 }
