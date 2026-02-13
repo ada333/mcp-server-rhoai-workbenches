@@ -14,6 +14,8 @@ var ImagesGVR = schema.GroupVersionResource{Group: "image.openshift.io", Version
 
 var HardwareProfilesGVR = schema.GroupVersionResource{Group: "infrastructure.opendatahub.io", Version: "v1", Resource: "hardwareprofiles"}
 
+var PodsGVR = schema.GroupVersionResource{Group: "", Version: "v1", Resource: "pods"}
+
 func GetDefaultNamespace() string {
 	if ns := os.Getenv("DEFAULT_NAMESPACE"); ns != "" {
 		return ns
@@ -154,6 +156,7 @@ type ListResourceConsumptionOutput struct {
 	CPUUsage    string `json:"cpuUsage" jsonschema_description:"the CPU usage"`
 	MemoryUsage string `json:"memoryUsage" jsonschema_description:"the memory usage"`
 	DiskUsage   string `json:"diskUsage" jsonschema_description:"the disk usage"`
+	UpTime      string `json:"upTime" jsonschema_description:"the up time"`
 }
 
 type ListResourceConsumptionPerWorkbenchInput struct {

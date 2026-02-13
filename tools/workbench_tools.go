@@ -104,12 +104,20 @@ func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.L
 			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get resource requests for workbench %s: %v", name, err)
 		}
 
-		uptime := "" // TODO
-
 		if status != "" {
 			status = "stopped"
 		} else {
 			status = "running"
+		}
+
+		uptime := ""
+		if status == "running" {
+			uptime, err = getUptimeFromWorkbench(wb.GetName(), wb.GetNamespace())
+			if err != nil {
+				return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get uptime for workbench %s: %v", name, err)
+			}
+		} else {
+			uptime = "0s"
 		}
 
 		diskUsage := ""
@@ -400,4 +408,30 @@ func GetImageInfo(ctx context.Context, displayName, version string) (string, str
 		}
 	}
 	return "", "", "", fmt.Errorf("image not found: %s:%s", displayName, version)
+}
+
+func getUptimeFromWorkbench(workbenchName string, nameSpace string) (string, error) {
+	ctx := context.Background()
+	clientset, err := GetClientSet()
+	if err != nil {
+		return "", fmt.Errorf("failed to get client set: %v", err)
+	}
+
+	labelSelector := fmt.Sprintf("notebook-name=%s", workbenchName)
+	pods, err := clientset.CoreV1().Pods(nameSpace).List(ctx, metav1.ListOptions{
+		LabelSelector: labelSelector,
+	})
+	if err != nil {
+		return "", fmt.Errorf("failed to list pods for workbench %s in namespace %s: %v", workbenchName, nameSpace, err)
+	}
+
+	if len(pods.Items) == 0 {
+		return "", nil
+	}
+
+	pod := pods.Items[0]
+	if pod.Status.StartTime == nil {
+		return "", nil
+	}
+	return pod.Status.StartTime.String(), nil
 }
