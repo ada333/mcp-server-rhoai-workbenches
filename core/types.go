@@ -40,6 +40,7 @@ type WorkbenchInfo struct {
 	CPUUsage         string `json:"cpuUsage" jsonschema_description:"the CPU usage of the workbench"`
 	MemoryUsage      string `json:"memoryUsage" jsonschema_description:"the memory usage of the workbench"`
 	DiskUsage        string `json:"diskUsage" jsonschema_description:"the disk usage of the workbench"`
+	GPUUsage         string `json:"gpuUsage" jsonschema_description:"the GPU usage of the workbench"`
 }
 
 type ListWorkbenchesResult struct {
@@ -156,6 +157,7 @@ type ListResourceConsumptionOutput struct {
 	CPUUsage    string `json:"cpuUsage" jsonschema_description:"the CPU usage"`
 	MemoryUsage string `json:"memoryUsage" jsonschema_description:"the memory usage"`
 	DiskUsage   string `json:"diskUsage" jsonschema_description:"the disk usage"`
+	GPUUsage    string `json:"gpuUsage" jsonschema_description:"the GPU usage"`
 	UpTime      string `json:"upTime" jsonschema_description:"the up time"`
 }
 

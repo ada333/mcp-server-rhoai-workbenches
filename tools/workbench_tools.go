@@ -37,31 +37,32 @@ func getPVCNameFromWorkbench(wb *unstructured.Unstructured) (string, error) {
 	return "", nil
 }
 
-func getResourceRequestsFromWorkbench(wb *unstructured.Unstructured) (cpuRequest, memoryRequest string, err error) {
+func getResourceRequestsFromWorkbench(wb *unstructured.Unstructured) (cpuRequest, memoryRequest, gpuRequest string, err error) {
 	containers, found, err := unstructured.NestedSlice(wb.Object, "spec", "template", "spec", "containers")
 	if err != nil {
-		return "", "", fmt.Errorf("failed to get containers: %v", err)
+		return "", "", "", fmt.Errorf("failed to get containers: %v", err)
 	}
 	if !found || len(containers) == 0 {
-		return "", "", nil
+		return "", "", "", nil
 	}
 
 	container, ok := containers[0].(map[string]interface{})
 	if !ok {
-		return "", "", nil
+		return "", "", "", nil
 	}
 
 	requests, found, err := unstructured.NestedStringMap(container, "resources", "requests")
 	if err != nil {
-		return "", "", fmt.Errorf("failed to get resource requests: %v", err)
+		return "", "", "", fmt.Errorf("failed to get resource requests: %v", err)
 	}
 	if !found {
-		return "", "", nil
+		return "", "", "", nil
 	}
 
 	cpuRequest = requests["cpu"]
 	memoryRequest = requests["memory"]
-	return cpuRequest, memoryRequest, nil
+	gpuRequest = requests["nvidia.com/gpu"] // maybe there can be other than nvidia.com/gpu?
+	return cpuRequest, memoryRequest, gpuRequest, nil
 }
 
 // lists workbenches in a given namespace
@@ -99,7 +100,7 @@ func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.L
 			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get PVC name for workbench %s: %v", name, err)
 		}
 
-		cpuRequest, memoryRequest, err := getResourceRequestsFromWorkbench(&wb)
+		cpuRequest, memoryRequest, gpuRequest, err := getResourceRequestsFromWorkbench(&wb)
 		if err != nil {
 			return nil, core.ListWorkbenchesResult{}, fmt.Errorf("failed to get resource requests for workbench %s: %v", name, err)
 		}
@@ -141,6 +142,7 @@ func ListWorkbenches(ctx context.Context, req *mcp.CallToolRequest, input core.L
 			CPUUsage:         cpuRequest,
 			MemoryUsage:      memoryRequest,
 			DiskUsage:        diskUsage,
+			GPUUsage:         gpuRequest,
 		}
 		workbenchesInfo = append(workbenchesInfo, workbenchInfo)
 

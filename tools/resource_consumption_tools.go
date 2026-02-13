@@ -78,6 +78,7 @@ func ListResourceConsumptionPerWorkbench(ctx context.Context, req *mcp.CallToolR
 				CPUUsage:    wb.CPUUsage,
 				MemoryUsage: wb.MemoryUsage,
 				DiskUsage:   wb.DiskUsage,
+				GPUUsage:    wb.GPUUsage,
 			}, nil
 		}
 	}
@@ -91,17 +92,19 @@ func ListResourceConsumptionPerNamespace(ctx context.Context, req *mcp.CallToolR
 		return nil, core.ListResourceConsumptionOutput{}, err
 	}
 
-	var cpuValues, memoryValues, diskValues []string
+	var cpuValues, memoryValues, diskValues, gpuValues []string
 	for _, wb := range workbenches.Workbenches {
 		cpuValues = append(cpuValues, wb.CPUUsage)
 		memoryValues = append(memoryValues, wb.MemoryUsage)
 		diskValues = append(diskValues, wb.DiskUsage)
+		gpuValues = append(gpuValues, wb.GPUUsage)
 	}
 
 	return nil, core.ListResourceConsumptionOutput{
 		CPUUsage:    sumResourceValues(cpuValues),
 		MemoryUsage: sumResourceValues(memoryValues),
 		DiskUsage:   sumResourceValues(diskValues),
+		GPUUsage:    sumResourceValues(gpuValues),
 	}, nil
 }
 
@@ -111,12 +114,13 @@ func ListResourceConsumptionPerUser(ctx context.Context, req *mcp.CallToolReques
 		return nil, core.ListResourceConsumptionOutput{}, err
 	}
 
-	var cpuValues, memoryValues, diskValues []string
+	var cpuValues, memoryValues, diskValues, gpuValues []string
 	for _, wb := range workbenches.Workbenches {
 		if wb.User == input.User {
 			cpuValues = append(cpuValues, wb.CPUUsage)
 			memoryValues = append(memoryValues, wb.MemoryUsage)
 			diskValues = append(diskValues, wb.DiskUsage)
+			gpuValues = append(gpuValues, wb.GPUUsage)
 		}
 	}
 
@@ -124,6 +128,7 @@ func ListResourceConsumptionPerUser(ctx context.Context, req *mcp.CallToolReques
 		CPUUsage:    sumResourceValues(cpuValues),
 		MemoryUsage: sumResourceValues(memoryValues),
 		DiskUsage:   sumResourceValues(diskValues),
+		GPUUsage:    sumResourceValues(gpuValues),
 	}, nil
 }
 
@@ -133,16 +138,18 @@ func ListResourceConsumptionPerCluster(ctx context.Context, req *mcp.CallToolReq
 		return nil, core.ListResourceConsumptionOutput{}, err
 	}
 
-	var cpuValues, memoryValues, diskValues []string
+	var cpuValues, memoryValues, diskValues, gpuValues []string
 	for _, wb := range workbenches.Workbenches {
 		cpuValues = append(cpuValues, wb.CPUUsage)
 		memoryValues = append(memoryValues, wb.MemoryUsage)
 		diskValues = append(diskValues, wb.DiskUsage)
+		gpuValues = append(gpuValues, wb.GPUUsage)
 	}
 
 	return nil, core.ListResourceConsumptionOutput{
 		CPUUsage:    sumResourceValues(cpuValues),
 		MemoryUsage: sumResourceValues(memoryValues),
 		DiskUsage:   sumResourceValues(diskValues),
+		GPUUsage:    sumResourceValues(gpuValues),
 	}, nil
 }
