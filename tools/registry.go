@@ -2,14 +2,21 @@ package tools
 
 import "github.com/modelcontextprotocol/go-sdk/mcp"
 
-func RegisterAllTools(server *mcp.Server) {
+func RegisterWriteTools(server *mcp.Server) {
 	registerPodTools(server)
 	registerNamespaceTools(server)
 	registerWorkbenchTools(server)
 	registerImageTools(server)
 	registerHardwareProfileTools(server)
 	registerStorageTools(server)
-	registerResourceConsumptionTools(server)
+}
+
+func RegisterReadOnlyTools(server *mcp.Server) {
+	registerWorkbenchListingTools(server)
+	registerImageListingTools(server)
+	registerHardwareProfileListingTools(server)
+	registerStorageListingTools(server)
+	registerResourceConsumptionListingTools(server)
 }
 
 func registerPodTools(server *mcp.Server) {
@@ -28,16 +35,6 @@ func registerNamespaceTools(server *mcp.Server) {
 
 func registerWorkbenchTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "List Workbenches",
-		Description: "list the workbenches in a given project namespace",
-	}, ListWorkbenches)
-
-	mcp.AddTool(server, &mcp.Tool{
-		Name:        "List All Workbenches",
-		Description: "list the workbenches across all namespaces",
-	}, ListAllWorkbenches)
-
-	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create Workbench",
 		Description: "create a new workbench with given name, image and image URL in a given project namespace",
 	}, CreateWorkbench)
@@ -53,12 +50,19 @@ func registerWorkbenchTools(server *mcp.Server) {
 	}, ChangeWorkbenchStatus)
 }
 
-func registerImageTools(server *mcp.Server) {
+func registerWorkbenchListingTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "List Images",
-		Description: "list all available notebook images",
-	}, ListImages)
+		Name:        "List Workbenches",
+		Description: "list the workbenches in a given project namespace",
+	}, ListWorkbenches)
 
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List All Workbenches",
+		Description: "list the workbenches across all namespaces",
+	}, ListAllWorkbenches)
+}
+
+func registerImageTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create Custom Image",
 		Description: "create a new custom notebook image",
@@ -70,12 +74,14 @@ func registerImageTools(server *mcp.Server) {
 	}, DeleteImage)
 }
 
-func registerHardwareProfileTools(server *mcp.Server) {
+func registerImageListingTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "List Hardware Profiles",
-		Description: "list the hardware profiles in a given project namespace",
-	}, ListHardwareProfiles)
+		Name:        "List Images",
+		Description: "list all available notebook images",
+	}, ListImages)
+}
 
+func registerHardwareProfileTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create Hardware Profile",
 		Description: "create a hardware profile with given name, description and resources",
@@ -87,19 +93,28 @@ func registerHardwareProfileTools(server *mcp.Server) {
 	}, DeleteHardwareProfile)
 }
 
-func registerStorageTools(server *mcp.Server) {
+func registerHardwareProfileListingTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
-		Name:        "List PVCs",
-		Description: "list the persistent volume claims in a given project namespace",
-	}, ListPVCs)
+		Name:        "List Hardware Profiles",
+		Description: "list the hardware profiles in a given project namespace",
+	}, ListHardwareProfiles)
+}
 
+func registerStorageTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "Create PVC",
 		Description: "create a persistent volume claim with given name and size in a given project namespace",
 	}, CreatePVCTool)
 }
 
-func registerResourceConsumptionTools(server *mcp.Server) {
+func registerStorageListingTools(server *mcp.Server) {
+	mcp.AddTool(server, &mcp.Tool{
+		Name:        "List PVCs",
+		Description: "list the persistent volume claims in a given project namespace",
+	}, ListPVCs)
+}
+
+func registerResourceConsumptionListingTools(server *mcp.Server) {
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "List Resource Consumption Per Workbench",
 		Description: "list the resource consumption of given workbench in a given namespace",

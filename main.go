@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"os"
 
 	"github.com/amaly/mcp-server-rhoai/prompts"
 	"github.com/amaly/mcp-server-rhoai/resources"
@@ -16,7 +17,12 @@ func main() {
 		Version: "v1.0.0",
 	}, nil)
 
-	tools.RegisterAllTools(server)
+	mode := os.Getenv("MCP_RHOAI_MODE")
+	if mode == "write" {
+		tools.RegisterWriteTools(server)
+	}
+	tools.RegisterReadOnlyTools(server)
+
 	resources.RegisterAllResources(server)
 	prompts.RegisterAllPrompts(server)
 
