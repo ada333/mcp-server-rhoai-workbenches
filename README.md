@@ -68,6 +68,51 @@ Test coverage includes:
 - Resource management
 - Image catalog parsing
 
+## Evaluation
+
+This project uses [Promptfoo](https://www.promptfoo.dev/) for automated evaluation of tool selection and execution quality. Promptfoo is an open-source testing framework specifically designed for evaluating LLM applications, tool calling, and agent behavior. It provides metrics-based testing with visual reports.
+
+### Run Evaluation
+
+```bash
+# Run evaluation tests
+make eval
+
+# Run evaluation and view results in browser
+make eval-view
+```
+
+**API Key Requirements:**
+
+The evaluation uses AI models to test the MCP server. You'll need an API key for one of the supported providers:
+
+- **OpenAI** (default): Set `OPENAI_API_KEY` environment variable
+  ```bash
+  export OPENAI_API_KEY=your-key-here
+  make eval
+  ```
+
+- **Anthropic Claude**: Uncomment the Claude provider in `promptfoo.yaml` and set `ANTHROPIC_API_KEY`
+  ```bash
+  export ANTHROPIC_API_KEY=your-key-here
+  make eval
+  ```
+
+- **Google Gemini**: Uncomment the Gemini provider in `promptfoo.yaml` and set `GOOGLE_API_KEY`
+  ```bash
+  export GOOGLE_API_KEY=your-key-here
+  make eval
+  ```
+
+The evaluation measures:
+- **Tool Selection Accuracy** - Does the system choose the correct tool for each prompt?
+- **Parameter Extraction** - Are the tool parameters extracted correctly?
+- **Execution Success Rate** - Do the tools execute without errors?
+
+Results are displayed in an interactive web UI showing pass/fail rates, detailed comparisons, and performance metrics.
+
+**Prerequisites**: Node.js/npm must be installed.
+
 ## Configuration
 
 The MCP server can be configured in AI assistants to enable workbench management through natural language.
