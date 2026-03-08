@@ -113,6 +113,62 @@ func CreateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input 
 	}, nil
 }
 
+func UpdateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.HardwareProfile) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
+	dyn, err := GetDynamicClient()
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, err
+	}
+
+	hardwareProfile, err := dyn.Resource(core.HardwareProfilesGVR).Namespace(core.GetDefaultNamespace()).Get(ctx, input.HardwareProfileName, metav1.GetOptions{})
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to get hardware profile: %v", err)
+	}
+
+	if input.HardwareProfileName != "" {
+		hardwareProfile.SetAnnotations(map[string]string{
+			"opendatahub.io/display-name": input.HardwareProfileName,
+		})
+	}
+
+	if len(input.Resources) > 0 {
+		existing, err := GetResourcesFromHardwareProfile(hardwareProfile)
+		if err != nil {
+			return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to get resources from hardware profile: %v", err)
+		}
+
+		merged := make(map[string]core.HardwareProfileResource, len(existing))
+		// resource identifier should be unique - so we overwrite existing one with the updated one
+		for _, res := range existing {
+			merged[res.ResourceIdentifier] = res
+		}
+		for _, res := range input.Resources {
+			merged[res.ResourceIdentifier] = res
+		}
+		updatedIdentifiers := make([]interface{}, 0, len(merged))
+		for _, res := range merged {
+			updatedIdentifiers = append(updatedIdentifiers, map[string]interface{}{
+				"displayName":  res.ResourceName,
+				"identifier":   res.ResourceIdentifier,
+				"resourceType": res.ResourceType,
+				"defaultCount": res.DefaultCount,
+				"maxCount":     res.MaxCount,
+				"minCount":     res.MinCount,
+			})
+		}
+
+		if err := unstructured.SetNestedSlice(hardwareProfile.Object, updatedIdentifiers, "spec", "identifiers"); err != nil {
+			return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to set hardware profile identifiers: %v", err)
+		}
+	}
+
+	_, err = dyn.Resource(core.HardwareProfilesGVR).Namespace(core.GetDefaultNamespace()).Update(ctx, hardwareProfile, metav1.UpdateOptions{})
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to update hardware profile: %v", err)
+	}
+
+	return nil, core.DefaultToolOutput{Message: "Hardware Profile was successfully updated!"}, nil
+}
+
 func DeleteHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.DeleteHardwareProfileInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
@@ -125,4 +181,29 @@ func DeleteHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input 
 	}
 
 	return nil, core.DefaultToolOutput{Message: fmt.Sprintf("Hardware Profile %s was successfully deleted", input.HardwareProfileName)}, nil
+}
+
+func GetResourcesFromHardwareProfile(hardWareProfile *unstructured.Unstructured) ([]core.HardwareProfileResource, error) {
+	identifiers, foundIdentifiers, err := unstructured.NestedSlice(hardWareProfile.Object, "spec", "identifiers")
+	if !foundIdentifiers || err != nil {
+		return nil, fmt.Errorf("failed to get identifiers: %v", err)
+	}
+
+	resources := make([]core.HardwareProfileResource, 0, len(identifiers))
+	for _, identifier := range identifiers {
+		identifierMap, okIdentifierMap := identifier.(map[string]interface{})
+		if !okIdentifierMap {
+			continue
+		}
+
+		resources = append(resources, core.HardwareProfileResource{
+			ResourceName:       identifierMap["displayName"].(string),
+			ResourceIdentifier: identifierMap["identifier"].(string),
+			ResourceType:       identifierMap["resourceType"].(string),
+			DefaultCount:       identifierMap["defaultCount"].(string),
+			MaxCount:           identifierMap["maxCount"].(string),
+			MinCount:           identifierMap["minCount"].(string),
+		})
+	}
+	return resources, nil
 }

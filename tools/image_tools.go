@@ -52,7 +52,7 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 				"name":      input.ImageName,
 				"namespace": namespace,
 				"annotations": map[string]interface{}{
-					"opendatahub.io/notebook-image-creator":   "htpasswd-cluster-admin-user", // who should it be?
+					"opendatahub.io/notebook-image-creator":   "htpasswd-cluster-admin-user", // where to get the actual user?
 					"opendatahub.io/notebook-image-desc":      input.ImageDescription,
 					"opendatahub.io/notebook-image-name":      input.ImageName,
 					"opendatahub.io/notebook-image-url":       input.ImageLocation,
@@ -98,6 +98,37 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 	}
 
 	return nil, core.DefaultToolOutput{Message: "Image was successfully created!"}, nil
+}
+
+func UpdateImage(ctx context.Context, req *mcp.CallToolRequest, input core.UpdateImageInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
+
+	dyn, err := GetDynamicClient()
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, err
+	}
+
+	image, err := dyn.Resource(core.ImagesGVR).Namespace(core.GetDefaultNamespace()).Get(ctx, input.ImageName, metav1.GetOptions{})
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to get image: %v", err)
+	}
+
+	if input.ImageName != "" {
+		image.SetAnnotations(map[string]string{
+			"opendatahub.io/notebook-image-name": input.ImageName,
+		})
+	}
+	if input.ImageDescription != "" {
+		image.SetAnnotations(map[string]string{
+			"opendatahub.io/notebook-image-desc": input.ImageDescription,
+		})
+	}
+
+	_, err = dyn.Resource(core.ImagesGVR).Namespace(core.GetDefaultNamespace()).Update(ctx, image, metav1.UpdateOptions{})
+	if err != nil {
+		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to update image: %v", err)
+	}
+
+	return nil, core.DefaultToolOutput{Message: fmt.Sprintf("Image %s was successfully updated", input.ImageName)}, nil
 }
 
 func DeleteImage(ctx context.Context, req *mcp.CallToolRequest, input core.DeleteImageInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {

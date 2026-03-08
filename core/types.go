@@ -89,6 +89,14 @@ type CreateWorkbenchInput struct {
 	PVCName          string          `json:"pvcName" jsonschema_description:"the name of the PVC"`
 }
 
+type UpdateWorkbenchInput struct {
+	Namespace        string          `json:"namespace" jsonschema_description:"the namespace of the workbench"`
+	WorkbenchName    string          `json:"workbenchName" jsonschema_description:"the name of the workbench"`
+	ImageDisplayName string          `json:"imageDisplayName" jsonschema_description:"the image display name - f.e. Jupyter | Data Science | CPU | Python 3.12"`
+	ImageTag         string          `json:"imageTag" jsonschema_description:"the image tag "`
+	HardwareProfile  HardwareProfile `json:"hardwareProfile" jsonschema_description:"the hardware profile to use"`
+	PVCName          string          `json:"pvcName" jsonschema_description:"the name of the PVC"`
+}
 type ListImagesOutput struct {
 	Images string `json:"images" jsonschema_description:"the list of images"`
 }
@@ -99,6 +107,11 @@ type ListNamespacesOutput struct {
 
 type CreateCustomImageInput struct {
 	ImageLocation    string `json:"imageLocation" jsonschema_description:"the location of the image"`
+	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`
+	ImageDescription string `json:"imageDescription" jsonschema_description:"the description of the image"`
+}
+
+type UpdateImageInput struct {
 	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`
 	ImageDescription string `json:"imageDescription" jsonschema_description:"the description of the image"`
 }
@@ -139,10 +152,15 @@ type DeleteHardwareProfileInput struct {
 	HardwareProfileName string `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
 }
 
-type CreatePVCInput struct {
+type PVCInput struct {
 	Namespace string `json:"namespace" jsonschema_description:"the namespace of the PVC"`
 	PVCName   string `json:"pvcName" jsonschema_description:"the name of the PVC"`
 	Size      string `json:"size" jsonschema_description:"the size of the PVC"`
+}
+
+type DeletePVCInput struct {
+	Namespace string `json:"namespace" jsonschema_description:"the namespace of the PVC"`
+	PVCName   string `json:"pvcName" jsonschema_description:"the name of the PVC"`
 }
 
 type PVCsOutput struct {
