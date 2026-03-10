@@ -284,16 +284,29 @@ Set the environment variable in your MCP server configuration (see [Configuratio
 
 ```
 mcp-server-rhoai/
-├── main.go              # Entry point
-├── core/                # Core types and utilities
-├── tools/               # MCP tool implementations
-│   ├── registry.go      # Tool registration
-│   ├── workbench_tools.go
-│   ├── image_tools.go
-│   └── ...
-├── resources/           # Resource definitions
-├── prompts/             # MCP prompts
-└── Makefile            # Build automation
+├── main.go                    # Entry point
+├── core/                      # Shared types and utilities
+│   ├── gvr.go                 # Kubernetes GroupVersionResource definitions
+│   ├── common_types.go        # Shared output/namespace types
+│   ├── workbench_types.go     # Workbench-related types
+│   ├── image_types.go         # Image-related types
+│   ├── hardware_profile_types.go  # Hardware profile types
+│   ├── pvc_types.go           # PVC-related types
+│   ├── resource_consumption_types.go  # Resource consumption types
+│   └── logging.go             # Logging utilities
+├── tools/                     # MCP tool implementations
+│   ├── registry.go            # Tool registration (read-only & write modes)
+│   ├── workbench_tools.go     # Workbench CRUD & status tools
+│   ├── image_tools.go         # Image management tools
+│   ├── hardware_profile_tools.go  # Hardware profile tools
+│   ├── storage_tools.go       # PVC management tools
+│   ├── namespace_tools.go     # Namespace listing tools
+│   ├── pod_tools.go           # Pod listing tools
+│   ├── resource_consumption_tools.go  # Resource monitoring tools
+│   └── common.go              # Shared tool helpers
+├── resources/                 # MCP resource definitions
+├── prompts/                   # MCP prompts
+└── Makefile                   # Build automation
 ```
 
 ### Adding New Tools
