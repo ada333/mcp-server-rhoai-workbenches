@@ -100,6 +100,7 @@ func CreateCustomImage(ctx context.Context, req *mcp.CallToolRequest, input core
 	return nil, core.DefaultToolOutput{Message: "Image was successfully created!"}, nil
 }
 
+// this one is not very useful, but it makes sense to have it for consistency - (all resources have CRUD tools)
 func UpdateImage(ctx context.Context, req *mcp.CallToolRequest, input core.UpdateImageInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 
 	dyn, err := GetDynamicClient()
@@ -112,9 +113,9 @@ func UpdateImage(ctx context.Context, req *mcp.CallToolRequest, input core.Updat
 		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to get image: %v", err)
 	}
 
-	if input.ImageName != "" {
+	if input.NewImageName != "" {
 		image.SetAnnotations(map[string]string{
-			"opendatahub.io/notebook-image-name": input.ImageName,
+			"opendatahub.io/notebook-image-name": input.NewImageName,
 		})
 	}
 	if input.ImageDescription != "" {

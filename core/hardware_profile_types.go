@@ -23,6 +23,12 @@ type HardwareProfileResource struct {
 	MinCount           string `json:"minCount" jsonschema_description:"the min count of the resource"`
 }
 
+type UpdateHardwareProfileInput struct {
+	HardwareProfileName    string                    `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile to update"`
+	NewHardwareProfileName string                    `json:"newHardwareProfileName,omitempty" jsonschema_description:"the new name to rename the hardware profile to (optional)"`
+	Resources              []HardwareProfileResource `json:"resources" jsonschema_description:"the resources of the hardware profile"`
+}
+
 type DeleteHardwareProfileInput struct {
 	HardwareProfileName string `json:"hardwareProfileName" jsonschema_description:"the name of the hardware profile"`
 }

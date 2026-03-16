@@ -78,8 +78,10 @@ func UpdatePVC(ctx context.Context, req *mcp.CallToolRequest, input core.PVCInpu
 			return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to set PVC size: %v", err)
 		}
 	}
-	if input.PVCName != "" {
-		pvc.SetName(input.PVCName)
+	if input.NewPVCName != "" {
+		pvc.SetAnnotations(map[string]string{
+			"openshift.io/display-name": input.NewPVCName,
+		})
 	}
 	_, err = dyn.Resource(core.PvcGVR).Namespace(input.Namespace).Update(ctx, pvc, metav1.UpdateOptions{})
 	if err != nil {

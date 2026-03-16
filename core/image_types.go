@@ -11,7 +11,8 @@ type CreateCustomImageInput struct {
 }
 
 type UpdateImageInput struct {
-	ImageName        string `json:"imageName" jsonschema_description:"the name of the image"`
+	ImageName        string `json:"imageName" jsonschema_description:"the name of the image to update"`
+	NewImageName     string `json:"newImageName,omitempty" jsonschema_description:"the new name to rename the image to (optional)"`
 	ImageDescription string `json:"imageDescription" jsonschema_description:"the description of the image"`
 }
 

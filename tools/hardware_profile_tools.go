@@ -113,7 +113,7 @@ func CreateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input 
 	}, nil
 }
 
-func UpdateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.HardwareProfile) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
+func UpdateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input core.UpdateHardwareProfileInput) (*mcp.CallToolResult, core.DefaultToolOutput, error) {
 	dyn, err := GetDynamicClient()
 	if err != nil {
 		return nil, core.DefaultToolOutput{}, err
@@ -124,9 +124,9 @@ func UpdateHardwareProfile(ctx context.Context, req *mcp.CallToolRequest, input 
 		return nil, core.DefaultToolOutput{}, fmt.Errorf("failed to get hardware profile: %v", err)
 	}
 
-	if input.HardwareProfileName != "" {
+	if input.NewHardwareProfileName != "" {
 		hardwareProfile.SetAnnotations(map[string]string{
-			"opendatahub.io/display-name": input.HardwareProfileName,
+			"opendatahub.io/display-name": input.NewHardwareProfileName,
 		})
 	}
 
@@ -197,12 +197,12 @@ func GetResourcesFromHardwareProfile(hardWareProfile *unstructured.Unstructured)
 		}
 
 		resources = append(resources, core.HardwareProfileResource{
-			ResourceName:       identifierMap["displayName"].(string),
-			ResourceIdentifier: identifierMap["identifier"].(string),
-			ResourceType:       identifierMap["resourceType"].(string),
-			DefaultCount:       identifierMap["defaultCount"].(string),
-			MaxCount:           identifierMap["maxCount"].(string),
-			MinCount:           identifierMap["minCount"].(string),
+			ResourceName:       convertToString(identifierMap["displayName"]),
+			ResourceIdentifier: convertToString(identifierMap["identifier"]),
+			ResourceType:       convertToString(identifierMap["resourceType"]),
+			DefaultCount:       convertToString(identifierMap["defaultCount"]),
+			MaxCount:           convertToString(identifierMap["maxCount"]),
+			MinCount:           convertToString(identifierMap["minCount"]),
 		})
 	}
 	return resources, nil
